@@ -1,7 +1,19 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the rake db:seed (or created alongside the db with db:setup).
-#
-# Examples:
-#
-#   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
-#   Mayor.create(name: 'Emanuel', city: cities.first)
+# create_table "pugs", force: :cascade do |t|
+#   t.string   "url"
+#   t.string   "title"
+#   t.text     "self_text"
+#   t.datetime "created_at", null: false
+#   t.datetime "updated_at", null: false
+# end
+
+url = "http://api.reddit.com/r/pugs/hot?limit=100"
+d = JSON.parse(`curl #{url}`)
+
+d['data']['children'].each do |child|
+  post = child['data']
+  Pug.create(
+    title: post['title'],
+    url: (post['url'] =~ /jpg$/) ? post['url'] : "#{post['url']}.jpg",
+    self_text: post['selftext_html']
+  ) if post['domain'] === "i.imgur.com"
+end
